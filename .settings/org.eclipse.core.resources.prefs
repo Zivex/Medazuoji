@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+encoding//src/main/java=UTF-8
+encoding//src/main/java/com/capinfo/assistant/platform/ws/card/model/CardPersonMessageBack.java=UTF-8
+encoding//src/main/java/com/capinfo/assistant/platform/ws/card/service/CardPersonMessageWsService.java=UTF-8
+encoding//src/main/java/com/capinfo/assistant/platform/ws/card/service/CardPersonMessageWsServiceService.java=UTF-8
+encoding//src/main/java/com/capinfo/assistant/platform/ws/card/service/CardPersonMessageWsServiceServiceLocator.java=UTF-8
+encoding//src/main/java/com/capinfo/assistant/platform/ws/card/service/CardPersonMessageWsServiceSoapBindingStub.java=UTF-8
+encoding//src/main/resources=UTF-8
+encoding//src/test/java=UTF-8
+encoding//src/test/resources=UTF-8
+encoding/<project>=UTF-8

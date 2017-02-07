@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/tx
+    http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/aop
+    http://www.springframework.org/schema/aop/spring-aop.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd
+    http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd" >
+ 
+  <import resource="classpath:META-INF/cxf/cxf.xml"/> 
+   <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml"/> 
+   <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+       
+    <jaxws:endpoint id="KeyCountService" address="/KeyCountService" 
+    implementor="com.capinfo.omp.ws.server.impl.KeyCountServiceImpl" />
+    
+    <jaxws:endpoint id="ImKeyResultService" address="/ImKeyResultService" 
+    implementor="com.capinfo.omp.ws.server.impl.ImKeyResultServiceImpl" />
+    
+    <jaxws:endpoint id="KeyRequestService" address="/KeyRequestService" 
+    implementor="com.capinfo.omp.ws.server.impl.KeyRequestServiceImpl" />
+    
+    
+   <!-- <bean id="client" class="com.bsit.webservice.OrderWebServiceI"  
+          factory-bean="clientFactory" factory-method="create"/> 
+    <bean id="clientFactory" class="org.apache.cxf.jaxws.JaxWsProxyFactoryBean"> 
+         <property name="serviceClass" value="com.bsit.webservice.OrderWebServiceI"/> 
+         <property name="address" value="http://192.168.1.20:8080/order/webservice/orderWebService?wsdl"/> 
+    </bean> -->
+ 
+</beans>

@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+    http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+
+	<display-name>sonic</display-name>
+	<context-param>
+		<param-name>webAppRootKey</param-name>
+		<param-value>sonic.root</param-value>
+	</context-param>
+	<context-param>
+		<param-name>log4jConfigLocation</param-name>
+		<param-value>classpath:log4j.properties</param-value>
+	</context-param>
+	<context-param>
+		<param-name>contextConfigLocation</param-name>
+		<param-value>
+  			classpath*:/applicationContext.xml,
+  			classpath*:/application-web-service.xml,
+  			classpath*:/applicationContext-security.xml,
+  			classpath*:/spring-cxf-service.xml,
+  			classpath*:/quartz.xml
+  		</param-value>
+	</context-param>
+	<filter>
+		<filter-name>Spring character encoding filter</filter-name>
+		<filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+		<init-param>
+			<param-name>encoding</param-name>
+			<param-value>UTF-8</param-value>
+		</init-param>
+	</filter>
+	
+	
+	<filter-mapping>
+		<filter-name>Spring character encoding filter</filter-name>
+		<url-pattern>*.shtml</url-pattern>
+	</filter-mapping>
+	
+	
+	
+	<filter-mapping>
+		<filter-name>Spring character encoding filter</filter-name>
+		<url-pattern>*.js</url-pattern>
+	</filter-mapping>
+	<!-- -->
+	<filter>
+		<filter-name>OpenSessionInView</filter-name>
+		<filter-class>org.springframework.orm.hibernate4.support.OpenSessionInViewFilter</filter-class>
+		<init-param>
+			<param-name>singleSession</param-name>
+			<param-value>true</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>OpenSessionInView</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+
+	<!-- -->
+	<filter>
+		<filter-name>jcaptchaFilter</filter-name>
+		<filter-class>com.capinfo.common.security.captcha.JCaptchaFilter</filter-class>
+		<init-param>
+			<param-name>failureUrl</param-name>
+			<param-value>/login.shtml?login_error=2</param-value>
+		</init-param>
+		<init-param>
+			<param-name>autoPassValue</param-name>
+			<param-value>FingerPrint</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>jcaptchaFilter</filter-name>
+		<url-pattern>/jcaptcha</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>jcaptchaFilter</filter-name>
+		<url-pattern>/login</url-pattern>
+	</filter-mapping>
+	
+	<!-- cxf -->
+	<filter>
+		<filter-name>CXFServlet</filter-name>
+		<filter-class>org.apache.cxf.transport.servlet.CXFServlet</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>CXFServlet</filter-name>
+		<url-pattern>/ws/*</url-pattern>
+	</filter-mapping>
+
+
+	<filter>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/login</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>/logout</url-pattern>
+	</filter-mapping>
+	<filter-mapping>
+		<filter-name>springSecurityFilterChain</filter-name>
+		<url-pattern>*.shtml</url-pattern>
+	</filter-mapping>
+
+	<filter>
+		<filter-name>SecurityFilter</filter-name>
+		<filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>SecurityFilter</filter-name>
+		<url-pattern>*.shtml</url-pattern>
+	</filter-mapping>
+
+
+	<listener>
+		<listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>org.springframework.web.util.IntrospectorCleanupListener</listener-class>
+	</listener>
+	<listener>
+		<listener-class>org.springframework.security.web.session.HttpSessionEventPublisher</listener-class>
+	</listener>
+	<servlet>
+		<servlet-name>controller</servlet-name>
+		<servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+		<init-param>
+			<param-name>namespace</param-name>
+			<param-value>application-web-servlet</param-value>
+		</init-param>
+		<init-param>
+			<param-name>publishEvents</param-name>
+			<param-value>false</param-value>
+		</init-param>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>controller</servlet-name>
+		<url-pattern>*.shtml</url-pattern>
+	</servlet-mapping>
+
+	<session-config>
+		<session-timeout>30</session-timeout>
+	</session-config>
+	<welcome-file-list>
+		<welcome-file>index.shtml</welcome-file>
+	</welcome-file-list>
+
+
+	<!-- <error-page> -->
+	<!-- <error-code>404</error-code> -->
+	<!-- <location>/WEB-INF/views/building.jsp</location> -->
+	<!-- </error-page> -->
+
+	<!-- <error-page> -->
+	<!-- <error-code>500</error-code> -->
+	<!-- <location>/WEB-INF/views/error.jsp</location> -->
+	<!-- </error-page> -->
+
+
+
+</web-app>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+						http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+						http://www.springframework.org/schema/context
+						http://www.springframework.org/schema/context/spring-context-4.1.xsd
+						http://www.springframework.org/schema/tx
+						http://www.springframework.org/schema/tx/spring-tx-4.1.xsd
+						http://www.springframework.org/schema/aop
+						http://www.springframework.org/schema/aop/spring-aop-4.1.xsd
+						http://www.springframework.org/schema/cache
+  						http://www.springframework.org/schema/cache/spring-cache-4.1.xsd">
+
+	<aop:aspectj-autoproxy />
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	<context:property-placeholder location="classpath:application-config.properties"
+		ignore-unresolvable="true" />
+
+	<!-- tomcat jdbc -->
+	<bean id="dataSource" destroy-method="close"
+		class="org.apache.tomcat.jdbc.pool.DataSource">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="initialSize" value="${dataSource.initialSize}" />
+		<property name="maxIdle" value="${dataSource.maxIdle}" />
+		<property name="minIdle" value="${dataSource.minIdle}" />
+		<property name="maxActive" value="${dataSource.maxActive}" />
+		<property name="logAbandoned" value="${dataSource.logAbandoned}" />
+		<property name="removeAbandoned" value="${dataSource.removeAbandoned}" />
+		<property name="removeAbandonedTimeout" value="${dataSource.removeAbandonedTimeout}" />
+		<property name="validationInterval" value="${dataSource.validationInterval}"/>
+		<property name="testWhileIdle" value="false"/> 
+        <property name="testOnReturn" value="false"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="validationQuery" value="select 1"/> 
+	</bean>
+
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">
+					${hibernate.dialect}
+				</prop>
+				<prop key="cache.use_structured_entries">true</prop>
+				<prop key="hibernate.cache.use_query_cache">false</prop>
+				<prop key="hibernate.show_sql">true</prop>
+				<prop key="hibernate.format_sql">false</prop>
+				<prop key="hibernate.use_sql_comments">false</prop>
+				<prop key="hibernate.jdbc.batch_size">10</prop>
+				<prop key="hibernate.query.substitutions">
+					true 1, false 0
+				</prop>
+				<prop key="javax.persistence.validation.mode">none</prop>
+				<prop key="hibernate.cache.region.factory_class">org.hibernate.cache.SingletonEhCacheRegionFactory
+				</prop>
+				<prop key="hibernate.cache.use_query_cache">false</prop>
+				<prop key="hibernate.cache.use_second_level_cache">true</prop>
+				<prop key="hibernate.connection.autocommit">true</prop>
+			</props>
+		</property>
+		<property name="packagesToScan">
+			<list>
+				<value>com.capinfo.common.model</value>
+				<value>com.capinfo.donghu.model</value>
+				<value>com.capinfo.serviceprovider.model</value>
+				<value>com.capinfo.region.model</value>
+			</list>
+		</property>
+		<property name="entityInterceptor" ref="populateInterceptor" />
+
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+
+	<bean id="lazyInjector" class="com.capinfo.framework.processor.LazyInjector" />
+
+	<bean id="populateInterceptor" class="com.capinfo.framework.interceptor.PopulateInterceptor" />
+
+	<!--Spring prop -->
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="classpath:messages_zh_CN" />
+	</bean>
+	<bean id="localeResolver"
+		class="org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver" />
+
+	<bean id="mimeTypeParser" class="com.capinfo.framework.service.impl.MimeTypeParserImpl">
+		<property name="propertiesName" value="mime-type-mapping.properties" />
+	</bean>
+
+	<!--Base Service -->
+	<bean id="baseDao" class="com.capinfo.framework.dao.impl.BaseDaoImpl">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="fetchEntityAndTableInfo" ref="fetchEntityAndTableInfoWithORM" />
+	</bean>
+
+	<bean id="generalService" class="com.capinfo.framework.service.impl.GeneralServiceImpl">
+		<property name="baseDao">
+			<ref bean="baseDao" />
+		</property>
+	</bean>
+
+	<bean id="fetchEntityAndTableInfoWithORM"
+		class="com.capinfo.framework.service.impl.FetchEntityAndTableInfoWithHibernate" />
+
+	<bean id="formatEntityProperty"
+		class="com.capinfo.framework.service.impl.FormatEntityPropertyImpl">
+		<property name="generalService" ref="generalService" />
+		<property name="applicationConfigBean" ref="applicationConfigBean" />
+	</bean>
+
+	<bean id="applicationConfigBean" class="com.capinfo.framework.config.ApplicationConfigBean">
+	</bean>
+
+	<bean id="entityPropertyCopy"
+		class="com.capinfo.framework.service.impl.EntityPropertyCopyImpl">
+		<property name="fetchEntityAndTableInfoWithORM" ref="fetchEntityAndTableInfoWithORM" />
+		<property name="generalService" ref="generalService" />
+	</bean>
+
+</beans>

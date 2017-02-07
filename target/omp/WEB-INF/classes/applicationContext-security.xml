@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+                        http://www.springframework.org/schema/security 
+                        http://www.springframework.org/schema/security/spring-security-4.0.xsd">
+
+	<global-method-security pre-post-annotations="enabled">
+	</global-method-security>
+
+	<http>
+		<access-denied-handler error-page="/access_denied.shtml" />
+		<form-login login-page="/login.shtml"
+			authentication-failure-url="/login.shtml?login_error=1"
+			authentication-success-handler-ref="authenticationSuccessHandler" />
+
+		<logout success-handler-ref="logoutSuccessHandler" />
+
+		<csrf disabled="true" />
+
+
+		<custom-filter ref="filterSecurityInterceptor" before="FILTER_SECURITY_INTERCEPTOR" />
+	</http>
+
+	<beans:bean id="sessionRegistry"
+		class="org.springframework.security.core.session.SessionRegistryImpl" />
+
+	<!-- AuthenticationSuccessHandler -->
+	<beans:bean id="authenticationSuccessHandler"
+		class="com.capinfo.common.security.authentication.AuthenticationSuccessHandlerImpl">
+		<beans:property name="defaultTargetUrl">
+			<beans:value>/admin/index.shtml</beans:value>
+		</beans:property>
+	</beans:bean>
+
+	<!-- LogoutSuccessHandler -->
+	<beans:bean id="logoutSuccessHandler"
+		class="com.capinfo.common.security.authentication.LogoutSuccessHandlerImpl">
+		<beans:property name="defaultTargetUrl">
+			<beans:value>/login.shtml</beans:value>
+		</beans:property>
+	</beans:bean>
+
+	<beans:bean id="filterSecurityInterceptor"
+		class="org.springframework.security.web.access.intercept.FilterSecurityInterceptor">
+		<beans:property name="authenticationManager" ref="authenticationManager" />
+		<beans:property name="accessDecisionManager" ref="accessDecisionManager" />
+		<beans:property name="securityMetadataSource" ref="securityMetadataSource" />
+
+		<!--URL静态配置 -->
+		<!-- <beans:property name="securityMetadataSource"> -->
+		<!-- <security:filter-security-metadata-source> -->
+		<!-- <security:intercept-url pattern="/admin/**" access="ROLE_ADMIN" /> -->
+		<!-- <security:intercept-url pattern="/admin/sys/**" access="ROLE_ADMIN" 
+			/> -->
+		<!-- </security:filter-security-metadata-source> -->
+		<!-- </beans:property> -->
+	</beans:bean>
+
+	<beans:bean id="securityMetadataSource"
+		class="com.capinfo.common.security.access.InvocationSecurityMetadataSourceServiceImpl">
+		<beans:constructor-arg
+			type="com.capinfo.common.security.userdetails.AuthorityDetailsService"
+			ref="authorityDetailsService"></beans:constructor-arg>
+	</beans:bean>
+
+	<beans:bean id="accessDecisionManager"
+		class="com.capinfo.common.security.access.AccessDecisionManagerImpl" />
+
+	<!-- 采用配置方式配置authenticationManager -->
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider ref="daoAuthenticationProvider" />
+	</authentication-manager>
+
+
+	<beans:bean id="daoAuthenticationProvider"
+		class="com.capinfo.common.security.authentication.dao.SecurityDaoAuthenticationProvider">
+		<beans:property name="userDetailsService" ref="userDetailsService" />
+		<beans:property name="passwordEncoder" ref="passwordEncoder" />
+		<!-- <beans:property name="userCache" ref="userCache" /> -->
+		<!-- <beans:property name="saltSource" ref="saltSource" /> -->
+	</beans:bean>
+
+	<beans:bean
+		class="org.springframework.security.crypto.password.StandardPasswordEncoder"
+		id="passwordEncoder" />
+
+	<beans:bean id="userDetailsService"
+		class="com.capinfo.common.security.userdetails.UserDetailsServiceImpl">
+		<beans:property name="dataSource" ref="dataSource" />
+		<beans:property name="enableGroups" value="false" />
+		<beans:property name="enableAuthorities" value="true" />
+		<beans:property name="usersByUsernameQuery">
+			<beans:value>SELECT USER_NAME, PASSWORD,ENABLED,ID,NAME_ FROM USERS
+				WHERE
+				USER_NAME=?
+			</beans:value>
+		</beans:property>
+		<beans:property name="authoritiesByUsernameQuery">
+			<beans:value>SELECT U.USER_NAME, G.ROLE_CODE
+				FROM USERS U
+				JOIN
+				USER_ROLES UG
+				on U.ID = UG.USER_ID
+				JOIN ROLES G ON UG.ROLE_ID = G.ID
+				WHERE
+				U.USER_NAME = ?
+			</beans:value>
+		</beans:property>
+	</beans:bean>
+
+	<beans:bean id="authorityDetailsService"
+		class="com.capinfo.common.security.userdetails.AuthorityDetailsServiceImpl">
+		<beans:property name="dataSource" ref="dataSource" />
+		<beans:property name="roleAuthoritiesNameQuery">
+			<beans:value>select R.ID,R.RESOURCE_VALUE ,G.ROLE_CODE from RESOURCES
+				R,RESOURCES_ROLES GA,ROLES G where R.ID=GA.RESOURCE_ID AND
+				GA.ROLE_ID=G.ID AND R.ENABLED=1 AND G.ENABLED=1 ORDER BY R.ID
+			</beans:value>
+		</beans:property>
+	</beans:bean>
+
+	<!-- SecurityUser Cache -->
+	<beans:bean id="securityCache"
+		class="com.capinfo.common.security.cache.impl.SecurityCacheImpl">
+	</beans:bean>
+
+
+	<beans:bean id="userCache"
+		class="org.springframework.security.core.userdetails.cache.EhCacheBasedUserCache">
+		<beans:property name="cache">
+			<beans:bean class="org.springframework.cache.ehcache.EhCacheFactoryBean" />
+		</beans:property>
+	</beans:bean>
+
+
+	<!-- Jcaptcha相关的配置 -->
+	<beans:bean id="captchaService"
+		class="com.octo.captcha.service.image.DefaultManageableImageCaptchaService">
+		<beans:property name="captchaEngine">
+			<beans:bean class="com.capinfo.common.security.captcha.CaptchaEngine" />
+		</beans:property>
+		<!-- 默认生成的图片180秒过期 , 可另行设置 <property name="minGuarantedStorageDelayInSeconds" 
+			value="180" /> -->
+	</beans:bean>
+
+	<beans:bean id="SecurityFilter"
+		class="com.capinfo.common.security.filter.SecurityFilter">
+	</beans:bean>
+
+</beans:beans>
